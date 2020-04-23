@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST" method="GET" action="Assign">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Select Username</legend>
+                <select class="form-control"  id="continent_selector" name="username" size=10 multiple>
+                    {{ form.username.label(class="form-control-label") }}
+                    
+                     {% for username in form.username.choices %}
+
+                        <option value= {{username}} >{{username}}</option>
+
+                     {% endfor %}
+
+                </select>
+                <legend class="border-bottom mb-4">Select Project</legend>
+                <select class="form-control" id="continent_selector" name="project" size=10 multiple>
+                    {{ form.project.label(class="form-control-label") }}
+                    
+                     {% for project in form.project.choices %}
+
+                        <option value= {{project}} >{{project}}</option>
+
+                     {% endfor %}
+                     
+                </select>
+                <legend class="border-bottom mb-4">Select Projectteam</legend>
+                <select class="form-control" name="projectteam" id="continent_selector" size=5>
+                    {{ form.projectteam.label(class="form-control-label") }}
+                        <option value= Devlopment >Devlopment</option>
+                        <option value= Testing >Testing</option>
+                        <option value= Support >Support</option>
+                        <option value= Management >Management</option>
+                </select>
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-outline-info") }}
+                </div>
+        </form>
+    </div>
+{% endblock content %}
