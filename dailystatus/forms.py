@@ -38,7 +38,6 @@ def pjf():
 		pj.append(i['project_name'])
 	return pj
 
-
 class AssignForms(FlaskForm):
 	username = SelectMultipleField('username',choices=usf())
 	project = SelectField('project',choices=pjf())

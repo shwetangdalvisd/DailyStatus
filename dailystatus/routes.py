@@ -77,12 +77,10 @@ def Assign():
 	User = mongo.db.user
 	Project = mongo.db.project_team
 	if form.username.data and form.project.data and form.projectteam.data is not None:
-		for us in form.username.data:
-			sd = us 
-			teammember = User.find_one({"username" : us})
-			projectn = Project.find_one({"project":form.project.data})
-			Project.update({"project":form.project.data}, { "$set": { "teammember":teammember } }, multi=True)
-			Project.find_and_modify(query = {"project": form.project.data, 'project.teammember' : us},update = { "$push": {"project_team":form.projectteam.data} })
+		for us in form.username.data: 
+			teammember = User.find_one({"username" : us}, {"_id":0, "projects":0})
+			teammember['Project_Team'] = form.projectteam.data
+			Project.update({"project_name":form.project.data},{"$push":{"team_member":teammember}})
 			User.update({"username":form.username.data},{ "$push":{"projects":form.project.data}})
 			flash('Team-member has been added!','success')
 		return redirect(url_for('Assign'))
@@ -92,7 +90,7 @@ def Assign():
 @app.route("/registerproject", methods=['GET', 'POST'])
 def RegisterProject():
 	form = ProjectForm()
-	Project = mongo.db.project
+	Project = mongo.db.project_team
 	if form.validate_on_submit():
 
 		pro = Project.find_one({"project_name": form.Project.data})
