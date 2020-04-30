@@ -77,20 +77,15 @@
                         {{ form.confirm_password(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group">
+                <legend class="border-bottom mb-4">Select Role</legend>
+                <select class="form-control" name="role" id="continent_selector" size=5>
                     {{ form.role.label(class="form-control-label") }}
-
-                    {% if form.role.errors %}
-                        {{ form.role(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.role.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.role(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
+                        <option value= Devloper >Devloper</option>
+                        <option value= Tester >Tester</option>
+                        <option value= Support >Support</option>
+                        <option value= Manager >Manager</option>
+                        <option value= admin >Admin</option>
+                </select>
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
