@@ -23,7 +23,7 @@
             {{ form.csrf_token }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Select Project</legend>
-                <select class="form-control" id="continent_selector" name="project" size=2 multiple>
+                <select class="form-control" id="continent_selector" name="project" size=1>
                     {{ form.project.label(class="form-control-label") }}
                     
                     {% for project in choices %}

@@ -1,16 +1,33 @@
 {% extends "layout.html" %}
+{% block head %}
+    <head>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script type=text/javascript>
+            $(function() {
+              $(select name=['project']).change( function() {
+                $.getJSON('/background_process', {
+                  project: $('input[name="project"]').val(),
+                }, function(data) {
+                  $("#result").val(data.result);
+                });
+                return false;
+              });
+            });
+        </script>
+    </head>
+{% endblock %}
 {% block content %}
  <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-          <a class="navbar-brand mr-4" href="/">Flask Blog</a>
+          <a class="navbar-brand mr-4" href="/">Daily Vector</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
-                <a class="nav-item nav-link" href=#>Update Status</a>
+                <a class="nav-item nav-link" href="{{ url_for('StatusUpdate') }}">Status Update</a>
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
@@ -25,8 +42,11 @@
                <legend class="border-bottom mb-4">View Status</legend>
                <div class="form-group" >
                     {{ form.project.label(class="form-control-label") }}
-                <select class="form-control" id="continent_selector" name="project" size=1>
+                <select class="form-control" id="project" name="project" size=1>
                     {{ form.project.label(class="form-control-label") }}
+
+                        <option >Select User</option>
+
                     
                      {% for project in form.project.choices %}
 
@@ -38,8 +58,11 @@
             </div>
                 <div class="form-group">
                     {{ form.username.label(class="form-control-label") }}
-               <select class="form-control"  id="continent_selector" name="username" size=1>
+               <select class="form-control"  id="result" name="username" size=1>
                 	{{ form.username.label(class="form-control-label") }}
+
+                        <option >Select User</option>
+
                     
                      {% for username in form.username.choices %}
 
@@ -55,6 +78,10 @@
                 <div class="form-group">
                     {{ form.submit(class="btn btn-outline-info") }}
                 </div>
+                <div class="form-group">
+                    {{ form.SendMail.label(class="form-control-label") }}
+                    {{ form.SendMail(class="form-control form-control-lg") }}
+                </div>
                 {% if stat%}
                 {% for s in stat %}
             <article class="media content-section">
@@ -64,7 +91,13 @@
 					    <big class="text-muted">{{ s.date }}</big>
 					    <big class="text-muted">{{s.project}}</big>
 				    </div>
-				    <p class="article-content">Description: {{ s.desc }}</p>
+            <div class="article-metadata">
+              <big class="text-muted">Jira No: {{ s.jira_no }}</big>
+              <big class="text-muted">Status:  {{ s.status }}</big>
+              <big class="text-muted">Env: {{s.env}}</big>
+            </div>
+				    <h4><p class="article-content">Description: {{ s.desc }}</p></h4>
+            <p class="article-content">Comment: {{ s.Comment }}</p>
 				    </div>
 				    </article>
   {% endfor %}

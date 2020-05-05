@@ -10,6 +10,7 @@
           <div class="collapse navbar-collapse" id="navbarToggle">
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
+                <a class="nav-item nav-link" href="{{ url_for('DeleteD') }}">Register User</a>
                 <a class="nav-item nav-link" href="{{ url_for('Register') }}">Register User</a>
                 <a class="nav-item nav-link" href="{{ url_for('RegisterProject') }}">Register Project</a>
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
@@ -27,9 +28,9 @@
                 <select class="form-control"  id="continent_selector" name="username" size=10 multiple>
                     {{ form.username.label(class="form-control-label") }}
                     
-                     {% for username in form.username.choices %}
+                     {% for u in choices %}
 
-                        <option value= {{username}} >{{username}}</option>
+                        <option value= {{u.username}} >{{u.username}}</option>
 
                      {% endfor %}
 
@@ -38,9 +39,9 @@
                 <select class="form-control" id="continent_selector" name="project" size=10 multiple>
                     {{ form.project.label(class="form-control-label") }}
                     
-                     {% for project in form.project.choices %}
+                     {% for p in choicesp %}
 
-                        <option value= {{project}} >{{project}}</option>
+                        <option value= {{p.project_name}} >{{p.project_name}}</option>
 
                      {% endfor %}
                      

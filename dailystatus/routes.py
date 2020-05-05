@@ -1,10 +1,13 @@
 from flask import render_template, url_for, flash, redirect, request,session,jsonify
-from dailystatus import app, mongo, bcrypt,login_manager
+from dailystatus import app, mongo, bcrypt,login_manager,mail,cache
 from bson.json_util import dumps
 from dailystatus.forms import LoginForm,RegisterForm,ProjectForm,AssignForms,StatusForm,DeleteForms,View_statusForm
 from flask_login import login_user, current_user, logout_user, login_required,UserMixin
 from bson.objectid import ObjectId
 import json
+from flask_mail import Message
+import datetime
+
 
 class JSONEncoder(json.JSONEncoder):
 	def default(self, o):
@@ -49,6 +52,7 @@ def login():
 
 @app.route("/register", methods=['GET', 'POST'])
 @login_required
+@cache.memoize(50)
 def Register():
 	User = mongo.db.user
 	if current_user.is_authenticated:
@@ -67,14 +71,15 @@ def Register():
 
 	return render_template('register.html', title='Register', form=form)
 
-
-
 @app.route("/Assign",methods=['GET','POST'])
 @login_required
+@cache.memoize(50)
 def Assign():
 	if current_user.is_authenticated:
 		pass
 	form = AssignForms()
+	choices = list(mongo.db.user.find())
+	choicesp = list(mongo.db.project_team.find())
 	User = mongo.db.user
 	Project = mongo.db.project_team
 	if form.username.data and form.project.data and form.projectteam.data is not None:
@@ -86,13 +91,12 @@ def Assign():
 				Project.update({"project_name":form.project.data},{"$push":{"team_member":teammember}})
 				User.update({"username":us},{ "$push":{"projects":form.project.data}})
 				flash('Team-member '+us+' has been added!','success')
-				return redirect(url_for('Assign'))
 			else:
 				flash('Team-member '+us+' is already part of team!','danger')
 
 		return redirect(url_for('Assign'))
 
-	return render_template('Assign.html',title='assign',form=form)
+	return render_template('Assign.html',title='assign',form=form,choices=choices,choicesp=choicesp)
 
 @app.route("/registerproject", methods=['GET', 'POST'])
 @login_required
@@ -139,21 +143,37 @@ def DeleteD():
 	User = mongo.db.user
 	project = mongo.db.project_team
 	form = DeleteForms()
-	if form.project.data and form.username.data is not None:
-		project.update({'project':form.project.data},{'$pull':{'team_member':{'username':form.username.data}}})
-		User.update({'username':form.username.data},{'$pull':{'projects':form.project.data}})
-		flash('user has been removed from project','success')
-		return redirect(url_for('DeleteD'))
-	elif form.project.data is None and form.username.data is not None:
-		User.remove({"username":form.username.data})
-		flash(' user has been removed!','success')
-		return redirect(url_for('DeleteD'))
-	elif form.username.data is None and form.project.data is not None:
-		project.remove({'project':form.project.data})
-		flash(' project has been removed!','success')
-		return redirect(url_for('DeleteD'))
+	choices = list(mongo.db.user.find())
+	choicesp = list(mongo.db.project_team.find())
+	if form.radio.data == "user":
+		if form.username.data is not None:
+			project.update({},{"$pull":{"team_member":{"username":form.username.data}}}, multi=True)
+			User.remove({"username":form.username.data})
+			#msg = mongo.db.runCommand({"getLastError": 1})
+			flash('user removed successfully'+form.username.data)
+			return redirect(url_for('DeleteD'))
+	elif form.radio.data == "project":
+		if form.project.data is not None:
+			User.update({},{'$pull':{'projects':form.project.data}}, multi=True)
+			project.remove({'project_name':form.project.data})
+			return redirect(url_for('DeleteD'))
+	elif form.radio.data == "userdel":
+		if form.project.data and form.username.data is not None:
+			project.update_one({'project_name':form.project.data},{'$pull':{'team_member':{'username':form.username.data}}})
+			User.update_one({'username':form.username.data},{'$pull':{'projects':form.project.data}})
+			flash('user removed successfully'+form.radio.data)
+			return redirect(url_for('DeleteD'))
+	return render_template('delete.html', title='Delete', form=form,choicesp=choicesp,choices=choices)
 
-	return render_template('delete.html', title='Delete', form=form)
+
+@app.route("/_background_proccess",methods=['GET','POST'])
+def _background_proccess():
+	project = request.args.get('project')
+	user = list(mongo.db.user.find({'project_team':project},{'team_member':1}))
+	sd = []
+	for s in user['team_member']:
+		sd.append(s['username'])
+	return jsonify (result = sd)
 
 @app.route("/viewstatus", methods=['GET', 'POST'])
 @login_required
@@ -165,9 +185,17 @@ def View_status():
 		return redirect(url_for('login'))
 	stat=[]
 	Status = mongo.db.task_status
-	if form.project.data and form.username.data is not None:
+	if form.project.data or form.username.data or form.date.data is not None and form.SendMail.data is None:
 		stat = list(Status.find({"project" : form.project.data, "date" : form.date.data, "username": form.username.data}))
 		return render_template('view-status.html', form=form, stat=stat)
+	if form.project.data and form.username.data and form.SendMail.data is not None:
+		stat = list(Status.find({"project" : form.project.data, "date" : form.date.data, "username": form.username.data}))
+		msg = Message(subject='test',sender='shwetangdemo@gmail.com',recipients=['shwetang.dalvi@sts.in'],body='This is Test Mail for App')
+		msg.html=render_template('Email.html',stat=stat)
+		mail.send(msg)
+		flash("Your Mail has been Send to Chief Reporting officer!!",'success')
+		return render_template('view-status.html', form=form, stat=stat)
+
 	return render_template('view-status.html', form=form, stat=stat)
 
 @app.route("/logout")

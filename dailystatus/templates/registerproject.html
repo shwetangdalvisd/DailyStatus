@@ -11,8 +11,9 @@
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
                 <a class="nav-item nav-link" href="{{ url_for('Register') }}">Register User</a>
-                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                 <a class="nav-item nav-link" href="{{ url_for('Assign') }}">Assign</a>
+                <a class="nav-item nav-link" href="{{ url_for('DeleteD') }}">Delete user</a>
+                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
 
             </div>
           </div>
@@ -20,7 +21,7 @@
       </nav>
     </header>
     <div class="content-section">
-        <form method="POST" action="">
+        <form method="POST" method="GET" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">ADD PROJECT</legend>
