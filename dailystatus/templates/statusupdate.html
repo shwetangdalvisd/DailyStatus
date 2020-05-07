@@ -3,7 +3,7 @@
     <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-          <a class="navbar-brand mr-4" href="/">Flask Blog</a>
+          <a class="navbar-brand mr-4" href="/">Daily Status</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -33,9 +33,8 @@
                     {% endfor %}
                      
                 </select>
-                <div class="form-group" placeholder="DD/MM/YYYY">
-                    {{ form.date.label(class="form-control-label",placeholder="DD/MM/YYYY") }}
-
+                <div class="form-group">
+                    {{ form.date.label(class="form-control-label") }}
                     {% if form.date.errors %}
                         {{ form.date(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
@@ -61,29 +60,28 @@
                         {{ form.jirano(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <legend class="border-bottom mb-4">Decription</legend>
-                <textarea placeholder="Description (50 characters)" min="50" max="60" class="form-control" name="desc">
-                </textarea>
+                <legend class="border-bottom mb-4">Title</legend>
+                <textarea placeholder="Title (50 characters)" min="50" max="60" class="form-control" name="desc"></textarea>
                 <legend class="border-bottom mb-4">Status</legend>
                 <select class="form-control" name="status" id="continent_selector" size=1>
                     {{ form.status.label(class="form-control-label") }}
-                        <option value= To_do >To DO</option>
-                        <option value= In_Devlopment >In Devlopment</option>
-                        <option value= WorkIn_Progress >Work In Progress</option>
-                        <option value= UAT >UAT</option>
-                        <option value= Code_Review >Code Review</option>
-                        <option value= Analysis>Analysis</option>
+                        <option value= 'To do' >To DO</option>
+                        <option value= 'In Devlopment' >In Devlopment</option>
+                        <option value= 'WorkIn Progress' >Work In Progress</option>
+                        <option value= 'UAT' >UAT</option>
+                        <option value= 'Code Review' >Code Review</option>
+                        <option value= 'Analysis'>Analysis</option>
+                        <option value= 'Done' >Done</option>
                 </select>
                 <legend class="border-bottom mb-4">env</legend>
                 <select name = env class="form-control" name="env" id="continent_selector" size=1>
                     {{ form.env.label(class="form-control-label") }}
-                        <option value= Devlopment_Status>Devlopment Status</option>
-                        <option value= Devlopment_Testing_Status>Devlopment Testing Status</option>
-                        <option value= UAT_Status>UAT Status</option>
+                        <option value= 'Devlopment Status'>Devlopment Status</option>
+                        <option value= 'Devlopment Testing Status'>Devlopment Testing Status</option>
+                        <option value= 'UAT Status'>UAT Status</option>
                 </select>
                 <legend class="border-bottom mb-4">Comment</legend>
-                <textarea placeholder="comments (50 characters)" min="50" max="60" class="form-control" name="comments">
-                </textarea>
+                <textarea placeholder="comments (200 characters)" min="200" max="210" class="form-control" name="comments"></textarea>
                 <div class="form-group">
                     {{ form.submit(class="btn btn-outline-info") }}
                 </div>

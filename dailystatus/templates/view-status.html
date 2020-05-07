@@ -45,12 +45,12 @@
                 <select class="form-control" id="project" name="project" size=1>
                     {{ form.project.label(class="form-control-label") }}
 
-                        <option >Select User</option>
+                        <option >Select Project</option>
 
                     
-                     {% for project in form.project.choices %}
+                     {% for p in choicesp %}
 
-                        <option value= {{project}} >{{project}}</option>
+                        <option value= {{p}} >{{p}}</option>
 
                      {% endfor %}
                      
@@ -64,9 +64,9 @@
                         <option >Select User</option>
 
                     
-                     {% for username in form.username.choices %}
+                     {% for u in choices %}
 
-                        <option value= {{username}} >{{username}}</option>
+                        <option value= {{u.username}} >{{u.username}}</option>
 
                      {% endfor %}
                 </select>
@@ -78,30 +78,41 @@
                 <div class="form-group">
                     {{ form.submit(class="btn btn-outline-info") }}
                 </div>
+                {% if cc or bcc%}
+                <article class="media content-section">
+              <div class="form-group">
+                {{ form.mailcc.label(class="form-control-label") }}
+                {{ form.mailcc(class="form-control form-control-lg",value=cc.mailcc) }}
+              </div>
+              </article>
+              <article>
                 <div class="form-group">
-                    {{ form.SendMail.label(class="form-control-label") }}
-                    {{ form.SendMail(class="form-control form-control-lg") }}
+                {{ form.mailbcc.label(class="form-control-label") }}
+                {{ form.mailbcc(class="form-control form-control-lg",value=bcc) }}
                 </div>
+                </article>
                 {% if stat%}
-                {% for s in stat %}
-            <article class="media content-section">
-    				<div class="media-body">
-    				<div class="article-metadata">
-					    <big class="text-muted">{{ s.username }}</big>
-					    <big class="text-muted">{{ s.date }}</big>
-					    <big class="text-muted">{{s.project}}</big>
-				    </div>
-            <div class="article-metadata">
-              <big class="text-muted">Jira No: {{ s.jira_no }}</big>
-              <big class="text-muted">Status:  {{ s.status }}</big>
-              <big class="text-muted">Env: {{s.env}}</big>
-            </div>
-				    <h4><p class="article-content">Description: {{ s.desc }}</p></h4>
-            <p class="article-content">Comment: {{ s.Comment }}</p>
-				    </div>
-				    </article>
-  {% endfor %}
-  {% endif %}
+                    <div class="panel-body" style="font-family:'Tahoma'">
+                        Hi,
+                        <br><br>Following are the status updates for 
+                        <b>{{stat.date}}</b>
+                        <br><br>
+                    {% for s in stat %}
+                        <div style="height:30px;text-valign:center;">
+                        <b>Name : {{s.username}}</b>
+                        </div>
+                        <div style="height:30px;text-valign:center;">
+                        <b><i>{{s.env}}:</i></b>
+                        </div>
+                        {% for u in s.status %}
+				                    <p><b>{{u.jira_no}}:</b>: {{ u.desc }}</p>
+                            <p><b>Status : {{u.status}}</b></p>
+                            <p><ul><li>{{u.Comment}}</li></ul></p>
+                        {% endfor %}
+                     </div>
+                {% endfor %}
+                {% endif %}
+                {% endif %}
         </form>
   
     </div>

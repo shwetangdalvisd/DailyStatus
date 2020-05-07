@@ -6,7 +6,7 @@ from flask_login import login_user, current_user, logout_user, login_required,Us
 from bson.objectid import ObjectId
 import json
 from flask_mail import Message
-import datetime
+from datetime import datetime
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -107,10 +107,11 @@ def RegisterProject():
 
 		pro = Project.find_one({"project_name": form.Project.data})
 		if pro is None:
-			Project.insert({"project_name" :form.Project.data,"doc":form.doc.data,"Cromail" :form.Cromail.data})
+			Project.insert({"project_name" :form.Project.data,"doc":form.doc.data,"Cromail" :form.Cromail.data,"mailcc":form.mailcc.data})
 			flash('Your project has been created!', 'success')
 			return redirect(url_for('RegisterProject'))
 		else:
+
 			flash('Projectname already exist! Enter new Projectname', 'danger')
 	return render_template('registerproject.html', title='RegisterProject', form=form)
 
@@ -131,9 +132,15 @@ def StatusUpdate():
 	choices = usd()
 	usr = mongo.db.user.find_one({"mail_id":em})
 	if form.project.data and form.date.data and form.jirano.data and form.status.data and form.env.data is not None:
-		TaskS.insert({"project":form.project.data , "username":usr['username'] , "date":form.date.data , "jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data,"env": form.env.data , "Comment":form.comments.data})
-		flash('Your status has been updated','success')
-		return redirect(url_for('StatusUpdate'))
+		date= form.date.data.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+		iso_date = datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%fZ")
+		sd = TaskS.find_one({"project_name":form.project.data,"username":usr['username'],"date":iso_date})
+		if sd is None:
+			TaskS.insert({"project_name":form.project.data ,'mail_id':em, "username":usr['username'] , "date":iso_date,"status":[{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data,"env": form.env.data , "Comment":form.comments.data}]})
+			flash('Your status has been updated','success')
+		else:
+			TaskS.update({"project_name":form.project.data,"date":iso_date,"username":usr['username']},{"$push":{"status":{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data,"env": form.env.data , "Comment":form.comments.data}}})
+			flash('Your status has been updated','success')
 
 	return render_template('statusupdate.html', title='StatusUpdate', form=form,choices=choices)
 
@@ -183,20 +190,42 @@ def View_status():
 		pass
 	else:
 		return redirect(url_for('login'))
-	stat=[]
+	stat = []
+	em = current_user.get_id()
+	def usd():
+		usr = []
+		usf = list(mongo.db.user.find({'mail_id':em}))
+		for i in usf:
+			s = i['projects']
+			for e in s:
+				usr.append(e)
+		return usr
+	choicesp = usd()
 	Status = mongo.db.task_status
-	if form.project.data or form.username.data or form.date.data is not None and form.SendMail.data is None:
-		stat = list(Status.find({"project" : form.project.data, "date" : form.date.data, "username": form.username.data}))
-		return render_template('view-status.html', form=form, stat=stat)
-	if form.project.data and form.username.data and form.SendMail.data is not None:
-		stat = list(Status.find({"project" : form.project.data, "date" : form.date.data, "username": form.username.data}))
-		msg = Message(subject='test',sender='shwetangdemo@gmail.com',recipients=['shwetang.dalvi@sts.in'],body='This is Test Mail for App')
-		msg.html=render_template('Email.html',stat=stat)
-		mail.send(msg)
-		flash("Your Mail has been Send to Chief Reporting officer!!",'success')
-		return render_template('view-status.html', form=form, stat=stat)
+	project = mongo.db.project_team
+	if form.project.data and form.username.data and form.date.data is not None:
+		date= form.date.data.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+		iso_date = datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%fZ")
+		stat = list(Status.find({"project" : form.project.data, "date" :iso_date, "username": form.username.data}))
+		cc = project.find_one({"project_name":form.project.data},{"mailcc":1})
+		em=[]
+		abc = Status.find({"project_name":form.project.data,"date":iso_date},{"mail_id":1,"_id":0})
+		for i in abc:
+			em.append(i['mail_id'])
+		bcc = ";".join(em)
+		return render_template('view-status.html', form=form, stat=stat, cc=cc, bcc=bcc,choicesp=choicesp)
+	# if form.project.data and form.date.data is not None:
+	# 	stat = list(Status.find({"project" : form.project.data, "date" : form.date.data}))
+	# 	return render_template('view-status.html', form=form, stat=stat,choicesp=choicesp)
+	#if form.project.data and form.username.data and form.date.data and form.SendMail.data is not None:
+		#stat = list(Status.find({"project" : form.project.data, "date" : form.date.data, "username": form.username.data}))
+		#msg = Message(subject='test',sender='shwetangdemo@gmail.com',recipients=['shwetang.dalvi@sts.in'],body='This is Test Mail for App')
+		#msg.html=render_template('Email.html',stat=stat)
+		#mail.send(msg)
+		#flash("Your Mail has been Send to Chief Reporting officer!!",'success')
+		#return render_template('view-status.html', form=form, stat=stat,choices=choices,choicesp=choicesp)
 
-	return render_template('view-status.html', form=form, stat=stat)
+	return render_template('view-status.html', form=form,choicesp=choicesp)
 
 @app.route("/logout")
 @login_required

@@ -67,6 +67,19 @@
                         {{ form.Cromail(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+                <div class="form-group">
+                    {{ form.mailcc.label(class="form-control-label") }}
+                    {% if form.mailcc.errors %}
+                        {{ form.mailcc(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.mailcc.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.mailcc(class="form-control form-control-lg",placeholder="email@abc.com;email2@abc.com;email3@abc.com") }}
+                    {% endif %}
+                </div>
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
