@@ -32,7 +32,7 @@
                
                     {% for p in choicesp %}
 
-                        <option value= {{p.project_name}} >{{p.project_name}}</option>
+                        <option value= '{{p.project_name}}' >{{p.project_name}}</option>
 
                     {% endfor %}
                      
@@ -43,7 +43,7 @@
                     <option value= >Select username</option>
                     {% for u in choices %}
 
-                        <option value= {{u.username}} >{{u.username}}</option>
+                        <option value= '{{u.username}}' >{{u.username}}</option>
 
                     {% endfor %}
                      

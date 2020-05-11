@@ -56,7 +56,7 @@
                     
                                     {% for p in choicesp %}
 
-                                      <option value= {{p}} >{{p}}</option>
+                                      <option value= '{{p}}' >{{p}}</option>
 
                                     {% endfor %}
                      
@@ -120,9 +120,11 @@
                           {{s['status'].index(u)+1}}. <a href={{cc.ticketl+u.jira_no}}>{{u.jira_no}}:</a> {{ u['desc']}}<br>
                             &nbsp;&nbsp;&nbsp;&nbsp;Status : <b>{{u['status']}}</b>
                             <div class="style" style="padding: 0px 0px;">
+                            <ul>
                             {% for cmd in u['Comment'] %}
-                            <ul><li>{{cmd}}</li></ul>
+                            <li>{{cmd}}</li>
                             {% endfor%}
+                            </ul>
                             </div>
 
                       {% endfor%}
