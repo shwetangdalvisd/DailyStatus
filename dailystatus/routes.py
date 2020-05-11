@@ -21,6 +21,12 @@ class User(UserMixin):
 	def get_id(self):
 		return self.email
 
+def suffix(d):
+	return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+def custom_strftime(format, t):
+	return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
+
 @login_manager.user_loader
 def load_user(email):
 	u = mongo.db.user.find_one({"mail_id" : email })
@@ -107,11 +113,10 @@ def RegisterProject():
 
 		pro = Project.find_one({"project_name": form.Project.data})
 		if pro is None:
-			Project.insert({"project_name" :form.Project.data,"doc":form.doc.data,"Cromail" :form.Cromail.data,"mailcc":form.mailcc.data})
+			Project.insert({"project_name" :form.Project.data,"doc":form.doc.data,"Cromail" :form.Cromail.data,"mailcc":form.mailcc.data,'subject':form.subject.data,"ticketl":form.ticketl.data})
 			flash('Your project has been created!', 'success')
 			return redirect(url_for('RegisterProject'))
 		else:
-
 			flash('Projectname already exist! Enter new Projectname', 'danger')
 	return render_template('registerproject.html', title='RegisterProject', form=form)
 
@@ -134,12 +139,17 @@ def StatusUpdate():
 	if form.project.data and form.date.data and form.jirano.data and form.status.data and form.env.data is not None:
 		date= form.date.data.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 		iso_date = datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%fZ")
+		comments = []
+		if "\n" in form.comments.data:
+			comments = form.comments.data.split("\n")
+		else:
+			comments.append(form.comments.data)
 		sd = TaskS.find_one({"project_name":form.project.data,"username":usr['username'],"date":iso_date})
 		if sd is None:
-			TaskS.insert({"project_name":form.project.data ,'mail_id':em, "username":usr['username'] , "date":iso_date,"status":[{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data,"env": form.env.data , "Comment":form.comments.data}]})
+			TaskS.insert({"project_name":form.project.data ,'mail_id':em, "username":usr['username'] , "date":iso_date,"env": form.env.data ,"status":[{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}]})
 			flash('Your status has been updated','success')
 		else:
-			TaskS.update({"project_name":form.project.data,"date":iso_date,"username":usr['username']},{"$push":{"status":{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data,"env": form.env.data , "Comment":form.comments.data}}})
+			TaskS.update({"project_name":form.project.data,"date":iso_date,"username":usr['username']},{"$push":{"status":{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}}})
 			flash('Your status has been updated','success')
 
 	return render_template('statusupdate.html', title='StatusUpdate', form=form,choices=choices)
@@ -173,14 +183,13 @@ def DeleteD():
 	return render_template('delete.html', title='Delete', form=form,choicesp=choicesp,choices=choices)
 
 
-@app.route("/_background_proccess",methods=['GET','POST'])
-def _background_proccess():
-	project = request.args.get('project')
-	user = list(mongo.db.user.find({'project_team':project},{'team_member':1}))
-	sd = []
+@app.route("/username/<project>",methods=['GET','POST'])
+def username(project):
+	user = list(mongo.db.project_team.find({'project_team':project},{'team_member':1}))
+	users = []
 	for s in user['team_member']:
-		sd.append(s['username'])
-	return jsonify (result = sd)
+		users.append(s['username'])
+	return jsonify ({"users" : users})
 
 @app.route("/viewstatus", methods=['GET', 'POST'])
 @login_required
@@ -206,14 +215,15 @@ def View_status():
 	if form.project.data and form.username.data and form.date.data is not None:
 		date= form.date.data.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 		iso_date = datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%fZ")
-		stat = list(Status.find({"project" : form.project.data, "date" :iso_date, "username": form.username.data}))
-		cc = project.find_one({"project_name":form.project.data},{"mailcc":1})
+		stat = list(Status.find({"project_name" : form.project.data, "date" :iso_date}))
+		cc = project.find_one({"project_name":form.project.data},{"mailcc":1,"Cromail":1,"ticketl":1,"subject":1,"_id":0})
 		em=[]
 		abc = Status.find({"project_name":form.project.data,"date":iso_date},{"mail_id":1,"_id":0})
 		for i in abc:
 			em.append(i['mail_id'])
 		bcc = ";".join(em)
-		return render_template('view-status.html', form=form, stat=stat, cc=cc, bcc=bcc,choicesp=choicesp)
+		formatdate = custom_strftime('{S} %B %Y', form.date.data)
+		return render_template('view-status.html', form=form, stat=stat, cc=cc, bcc=bcc,choicesp=choicesp, formatdate=formatdate)
 	# if form.project.data and form.date.data is not None:
 	# 	stat = list(Status.find({"project" : form.project.data, "date" : form.date.data}))
 	# 	return render_template('view-status.html', form=form, stat=stat,choicesp=choicesp)
@@ -224,7 +234,6 @@ def View_status():
 		#mail.send(msg)
 		#flash("Your Mail has been Send to Chief Reporting officer!!",'success')
 		#return render_template('view-status.html', form=form, stat=stat,choices=choices,choicesp=choicesp)
-
 	return render_template('view-status.html', form=form,choicesp=choicesp)
 
 @app.route("/logout")

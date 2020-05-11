@@ -1,23 +1,29 @@
 {% extends "layout.html" %}
-{% block head %}
-    <head>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script type=text/javascript>
-            $(function() {
-              $(select name=['project']).change( function() {
-                $.getJSON('/background_process', {
-                  project: $('input[name="project"]').val(),
-                }, function(data) {
-                  $("#result").val(data.result);
-                });
-                return false;
-              });
-            });
-        </script>
-    </head>
-{% endblock %}
 {% block content %}
- <header class="site-header">
+  <head>
+    <script>
+      $(document).ready(function() {
+                  $('#project').change(function(){
+                    var project = $('#project').val();
+
+                    $.getJSON(
+                      '/username' + '/' + project,
+                        function(data){
+
+                          $('#result').find('option').remove();
+
+                          $.each(data, function(key, val) {
+                          var option_item = '<option value="' + val + '">' + val + '</option>'
+                          $('#result').append(option_item);
+                           });
+                        
+                          }
+                        );
+                      });
+                    });
+    </script>
+  </head>
+  <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
           <a class="navbar-brand mr-4" href="/">Daily Vector</a>
@@ -35,85 +41,100 @@
       </nav>
     </header>
     <div class="content-section">
-        <form method="POST" method="GET">
-            {{ form.hidden_tag() }}
-            {{ form.csrf_token }}
-            <fieldset class="form-group">
-               <legend class="border-bottom mb-4">View Status</legend>
-               <div class="form-group" >
-                    {{ form.project.label(class="form-control-label") }}
-                <select class="form-control" id="project" name="project" size=1>
-                    {{ form.project.label(class="form-control-label") }}
+      <form class="form-horizontal" role="form" action="" method="POST">
 
-                        <option >Select Project</option>
+                <table border="0" class="table table-condensed" style="margin-bottom: 0px;">
+                    <tbody>
+                        <tr>
+                            <td width="16%"><label class="control-label">Select Project</label></td>
+                            <td width="80%">
+                               <select class="form-control" id="project" name="project" size=1>
+                                  {{ form.project.label(class="form-control-label") }}
+
+                                    <option >Select Project</option>
 
                     
-                     {% for p in choicesp %}
+                                    {% for p in choicesp %}
 
-                        <option value= {{p}} >{{p}}</option>
+                                      <option value= {{p}} >{{p}}</option>
 
-                     {% endfor %}
+                                    {% endfor %}
                      
-                </select>
-            </div>
-                <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
-               <select class="form-control"  id="result" name="username" size=1>
-                	{{ form.username.label(class="form-control-label") }}
-
-                        <option >Select User</option>
-
-                    
-                     {% for u in choices %}
-
-                        <option value= {{u.username}} >{{u.username}}</option>
-
-                     {% endfor %}
-                </select>
-            </div>
-                <div class="form-group">
-                    {{ form.date.label(class="form-control-label") }}
-                    {{ form.date(class="form-control form-control-lg", placeholder="yy-mm-dd") }}
-                </div>
-                <div class="form-group">
-                    {{ form.submit(class="btn btn-outline-info") }}
-                </div>
-                {% if cc or bcc%}
-                <article class="media content-section">
-              <div class="form-group">
-                {{ form.mailcc.label(class="form-control-label") }}
-                {{ form.mailcc(class="form-control form-control-lg",value=cc.mailcc) }}
-              </div>
-              </article>
-              <article>
-                <div class="form-group">
-                {{ form.mailbcc.label(class="form-control-label") }}
-                {{ form.mailbcc(class="form-control form-control-lg",value=bcc) }}
-                </div>
-                </article>
-                {% if stat%}
-                    <div class="panel-body" style="font-family:'Tahoma'">
+                              </select>
+                            </td>
+                            <td width="16%" align="right"><label class="control-label">Select Date</label></td>
+                            <td width="18%">
+                              {{ form.date(class="form-control form-control-lg", placeholder="yy-mm-dd") }}
+                            </td>
+                            <td width="8%">{{ form.submit(class="btn btn-outline-info") }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+              </form>
+          </div>
+      {% if cc or bcc%}
+        <div class="panel panel-primary" style="margin-bottom: 10px;">
+            <form method="POST" method="GET">
+                <table border="0" class="table table-striped" style="margin-bottom: 0px;">
+                    <tbody>
+                        <tr>
+                            <td width="10%"><label class="control-label">To :</label></td>
+                            <td>{{ form.to(class="form-control form-control-lg",value=cc.Cromail) }}</td>
+                        </tr>
+                        <tr>
+                            <td width="10%"><label class="control-label">cc :</label></td>
+                            <td>{{ form.mailcc(class="form-control form-control-lg",value=cc.mailcc) }}</td>
+                        </tr>
+                        <tr>
+                            <td width="10%"><label class="control-label">bcc :</label></td>
+                            <td>{{ form.mailbcc(class="form-control form-control-lg",value=bcc) }}</td>
+                        </tr>
+                        <tr>
+                            <td width="10%"><label class="control-label">Subject :</label></td>
+                            <td>{{ form.subject(class="form-control form-control-lg",value=cc.subject) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        {% endif %}
+        <div class="content-section">
+          <form method="POST" method="GET">
+                {% if stat %}
+                    <div class="content-section" style="font-family:'Tahoma'">
+                      <div class="style" style="font-size: 14px;font-style: normal;font: -webkit-mini-control;padding: 0px 0px;">
                         Hi,
                         <br><br>Following are the status updates for 
-                        <b>{{stat.date}}</b>
+                        <b>{{formatdate}}</b>,
                         <br><br>
                     {% for s in stat %}
                         <div style="height:30px;text-valign:center;">
-                        <b>Name : {{s.username}}</b>
+                        <i><b>{{s.env}}:</b></i>
+                        <br><br>
                         </div>
                         <div style="height:30px;text-valign:center;">
-                        <b><i>{{s.env}}:</i></b>
+                        <b>Name : {{s.username}}</b>
                         </div>
-                        {% for u in s.status %}
+ 
+                        {% for u in s['status']%}
+                          {{s['status'].index(u)+1}}. <a href={{cc.ticketl+u.jira_no}}>{{u.jira_no}}:</a> {{ u['desc']}}<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;Status : <b>{{u['status']}}</b>
+                            <div class="style" style="padding: 0px 0px;">
+                            {% for cmd in u['Comment'] %}
+                            <ul><li>{{cmd}}</li></ul>
+                            {% endfor%}
+                            </div>
+
+                      {% endfor%}
+<!--                         {% for u in s.status %}
 				                    <p><b>{{u.jira_no}}:</b>: {{ u.desc }}</p>
                             <p><b>Status : {{u.status}}</b></p>
                             <p><ul><li>{{u.Comment}}</li></ul></p>
-                        {% endfor %}
-                     </div>
-                {% endfor %}
+                        {% endfor %} -->
+                    {% endfor %}
+                  </div>
+                  </div>
                 {% endif %}
-                {% endif %}
-        </form>
-  
-    </div>
+          </form>
+        </div>
 {% endblock content %}

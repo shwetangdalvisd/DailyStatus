@@ -26,6 +26,8 @@ class ProjectForm(FlaskForm):
 	doc = StringField('Enter Date of Conpletion')
 	Cromail = StringField('CRO Email',validators=[Optional(), Email()])
 	mailcc = StringField('Email CC',validators=[DataRequired()])
+	ticketl = StringField('Ticket Link',validators=[DataRequired()])
+	subject = StringField('Subject',validators=[DataRequired()])
 	submit = SubmitField('submit')
 
 def usf():
@@ -63,6 +65,8 @@ class View_statusForm(FlaskForm):
 	date = DateField('Date',format='%Y-%m-%d',validators=[DataRequired()])
 	mailcc = StringField('cc : ')
 	mailbcc = StringField('bcc : ')
+	to = StringField('To : ')
+	subject = StringField('Subject : ')	
 	submit = SubmitField('submit')
 	#SendMail = RadioField('Send Mail',choices=[('value','Send Mail')])
 

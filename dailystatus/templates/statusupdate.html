@@ -18,74 +18,97 @@
       </nav>
     </header>
     <div class="content-section">
-        <form method="POST" method="GET" action="">
-            {{ form.hidden_tag() }}
-            {{ form.csrf_token }}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Select Project</legend>
-                <select class="form-control" id="continent_selector" name="project" size=1>
-                    {{ form.project.label(class="form-control-label") }}
+        <form class="form-horizontal" role="form" action="" method="POST">
+
+                <table border="0" class="table table-striped" style="margin-bottom: 0px;">
+                    <tbody>
+                        <tr>
+                            <td width="16%"><label class="control-label">Select Project</label></td>
+                            <td width="80%">
+                               <select class="form-control" id="project" name="project" size=1>
+                                  {{ form.project.label(class="form-control-label") }}
+
+                                    <option >Select Project</option>
+
                     
-                    {% for project in choices %}
+                                    {% for p in choices %}
 
-                        <option value= {{project}} >{{project}}</option>
+                                      <option value= {{p}} >{{p}}</option>
 
-                    {% endfor %}
+                                    {% endfor %}
                      
-                </select>
-                <div class="form-group">
-                    {{ form.date.label(class="form-control-label") }}
-                    {% if form.date.errors %}
-                        {{ form.date(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.date.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.date(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.jirano.label(class="form-control-label") }}
-
-                    {% if form.jirano.errors %}
-                        {{ form.jirano(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.jirano.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.jirano(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <legend class="border-bottom mb-4">Title</legend>
-                <textarea placeholder="Title (50 characters)" min="50" max="60" class="form-control" name="desc"></textarea>
-                <legend class="border-bottom mb-4">Status</legend>
-                <select class="form-control" name="status" id="continent_selector" size=1>
-                    {{ form.status.label(class="form-control-label") }}
-                        <option value= 'To do' >To DO</option>
-                        <option value= 'In Devlopment' >In Devlopment</option>
-                        <option value= 'WorkIn Progress' >Work In Progress</option>
-                        <option value= 'UAT' >UAT</option>
-                        <option value= 'Code Review' >Code Review</option>
-                        <option value= 'Analysis'>Analysis</option>
-                        <option value= 'Done' >Done</option>
-                </select>
-                <legend class="border-bottom mb-4">env</legend>
-                <select name = env class="form-control" name="env" id="continent_selector" size=1>
-                    {{ form.env.label(class="form-control-label") }}
-                        <option value= 'Devlopment Status'>Devlopment Status</option>
-                        <option value= 'Devlopment Testing Status'>Devlopment Testing Status</option>
-                        <option value= 'UAT Status'>UAT Status</option>
-                </select>
-                <legend class="border-bottom mb-4">Comment</legend>
-                <textarea placeholder="comments (200 characters)" min="200" max="210" class="form-control" name="comments"></textarea>
-                <div class="form-group">
-                    {{ form.submit(class="btn btn-outline-info") }}
-                </div>
-            </fieldset>     
+                              </select>
+                            </td>
+                            <td width="16%" align="right"><label class="control-label">Select Date</label></td>
+                            <td width="18%">
+                              {{ form.date(class="form-control form-control-lg", placeholder="yy-mm-dd") }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table border="0" class="table table-striped" style="margin-bottom: 0px;">
+                    <tbody>
+                            <tr><td width="7d%"><label class="control-label">Ticket No</label></td>
+                            <td width="13%">
+                                {% if form.jirano.errors %}
+                                    {{ form.jirano(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                    {% for error in form.jirano.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                    </div>
+                                    {% else %}
+                                        {{ form.jirano(class="form-control form-control-lg") }}
+                                    {% endif %}
+                            </td>
+                            <td width="5%"><label class="control-label">Title.</label></td>
+                            <td><textarea placeholder="Title (50 characters)" min="50" max="60" class="form-control" name="desc"></textarea></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table border="0" class="table table-striped" style="margin-bottom: 0px;">
+                    <tbody>
+                        <tr>
+                            <td width="11%"><label class="control-label">Select Status</label></td>
+                            <td width="20%">
+                                <select class="form-control" name="status" id="continent_selector" size=1>
+                                    <option value= 'To do' >To DO</option>
+                                    <option value= 'In Devlopment' >In Devlopment</option>
+                                    <option value= 'WorkIn Progress' >Work In Progress</option>
+                                    <option value= 'UAT' >UAT</option>
+                                    <option value= 'Code Review' >Code Review</option>
+                                    <option value= 'Analysis'>Analysis</option>
+                                    <option value= 'Done' >Done</option>
+                                </select>
+                            </td>
+                            <td width="7%"><label class="control-label">Env</label></td>
+                            <td width="25%">
+                                <select name = env class="form-control" name="env" id="continent_selector" size=1>
+                                    <option value= 'Devlopment Status'>Devlopment Status</option>
+                                    <option value= 'Devlopment Testing Status'>Devlopment Testing Status</option>
+                                    <option value= 'UAT Status'>UAT Status</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table border="0" class="table table-striped" style="margin-bottom: 0px;">
+                    <tbody>
+                        <tr>
+                            <td width="11%"><label class="control-label">Comments</label></td>
+                            <td><textarea placeholder="Comments" class="form-control" name="comments"></textarea></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table border="0" class="table table-striped" style="margin-bottom: 0px;">
+                    <tbody>
+                        <tr>
+                            <td width="8%">
+                                {{ form.submit(class="btn btn-outline-info") }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
         </form>
     </div>
 {% endblock content %}
