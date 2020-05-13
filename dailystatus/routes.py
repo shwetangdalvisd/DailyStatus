@@ -124,6 +124,7 @@ def RegisterProject():
 @login_required
 def StatusUpdate():
 	TaskS = mongo.db.task_status
+	TaskUD = mongo.db.task_status_ud
 	em = current_user.get_id()
 	form = StatusForm()
 	def usd():
@@ -144,14 +145,30 @@ def StatusUpdate():
 			comments = form.comments.data.split("\n")
 		else:
 			comments.append(form.comments.data)
-		sd = TaskS.find_one({"project_name":form.project.data,"username":usr['username'],"date":iso_date})
-		if sd is None:
-			TaskS.insert({"project_name":form.project.data ,'mail_id':em, "username":usr['username'] , "date":iso_date,"env": form.env.data ,"status":[{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}]})
-			flash('Your status has been updated','success')
+		if form.env.data == 'Development Status':
+			sd = TaskS.find_one({"project_name":form.project.data,"username":usr['username'],"date":iso_date,"env":form.env.data})
+			if sd is None:
+				TaskS.insert({"project_name":form.project.data ,'mail_id':em, "username":usr['username'] , "date":iso_date,"env": form.env.data ,"status":[{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}]})
+				flash('Your status has been updated','success')
+			else:
+				TaskS.update({"project_name":form.project.data,"date":iso_date,"username":usr['username']},{"$push":{"status":{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}}})
+				flash('Your status has been updated','success')
 		else:
-			TaskS.update({"project_name":form.project.data,"date":iso_date,"username":usr['username']},{"$push":{"status":{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}}})
-			flash('Your status has been updated','success')
-
+			sd = TaskUD.find_one({"project_name":form.project.data,"username":usr['username'],"date":iso_date})
+			if sd is None:
+				TaskUD.insert({"project_name":form.project.data ,'mail_id':em, "username":usr['username'] , "date":iso_date,"pstatus":[{"env":form.env.data ,"status":[{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}]}]})
+				flash('Your status has been updated','success')
+			else:
+				vk = TaskUD.find_one({"project_name":form.project.data,"username":usr['username'],"date":iso_date,"pstatus.env":form.env.data})
+				if vk is not None:
+					TaskUD.update({"project_name":form.project.data,"date":iso_date,"username":usr['username'],"pstatus.env":form.env.data},{"$push":{"pstatus.$.status":{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}}})
+					flash('Your status has been updated','success')
+				else:
+					TaskUD.update({"project_name":form.project.data,"date":iso_date,"username":usr['username']},{"$push":{"pstatus":{"env":form.env.data ,"status":[{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}]}}})
+					# TaskUD.update({"project_name":form.project.data , "username":usr['username'] , "date":iso_date},{"$push":{"pstatus.$.env":form.env.data}})
+					# TaskUD.update({"project_name":form.project.data,"date":iso_date,"username":usr['username'],"pstatus.$.env":form.env.data},{"$push":{"pstatus.$.status":{"jira_no":form.jirano.data , "desc":form.desc.data , "status":form.status.data, "Comment":comments}}})
+					flash('Your status has been updated','success')			
+		return redirect(url_for('StatusUpdate'))
 	return render_template('statusupdate.html', title='StatusUpdate', form=form,choices=choices)
 
 @app.route("/delete", methods=['GET', 'POST'])
@@ -211,29 +228,26 @@ def View_status():
 		return usr
 	choicesp = usd()
 	Status = mongo.db.task_status
+	Status_ud = mongo.db.task_status_ud
 	project = mongo.db.project_team
-	if form.project.data and form.username.data and form.date.data is not None:
+	if form.project.data and form.date.data is not None:
 		date= form.date.data.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 		iso_date = datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%fZ")
-		stat = list(Status.find({"project_name" : form.project.data, "date" :iso_date}))
+		stat = list(Status.find({"project_name" : form.project.data, "date" :iso_date, "env":'Development Status'}))
+		remstat = list(Status_ud.find({"project_name" : form.project.data, "date" :iso_date}))
 		cc = project.find_one({"project_name":form.project.data},{"mailcc":1,"Cromail":1,"ticketl":1,"subject":1,"_id":0})
 		em=[]
 		abc = Status.find({"project_name":form.project.data,"date":iso_date},{"mail_id":1,"_id":0})
+		efg = Status_ud.find({"project_name":form.project.data,"date":iso_date},{"mail_id":1,"_id":0})
 		for i in abc:
-			em.append(i['mail_id'])
+			if i['mail_id'] not in em:
+				em.append(i['mail_id'])
+		for i in efg:
+			if i['mail_id'] not in em:
+				em.append(i['mail_id'])
 		bcc = ";".join(em)
 		formatdate = custom_strftime('{S} %B %Y', form.date.data)
-		return render_template('view-status.html', form=form, stat=stat, cc=cc, bcc=bcc,choicesp=choicesp, formatdate=formatdate)
-	# if form.project.data and form.date.data is not None:
-	# 	stat = list(Status.find({"project" : form.project.data, "date" : form.date.data}))
-	# 	return render_template('view-status.html', form=form, stat=stat,choicesp=choicesp)
-	#if form.project.data and form.username.data and form.date.data and form.SendMail.data is not None:
-		#stat = list(Status.find({"project" : form.project.data, "date" : form.date.data, "username": form.username.data}))
-		#msg = Message(subject='test',sender='shwetangdemo@gmail.com',recipients=['shwetang.dalvi@sts.in'],body='This is Test Mail for App')
-		#msg.html=render_template('Email.html',stat=stat)
-		#mail.send(msg)
-		#flash("Your Mail has been Send to Chief Reporting officer!!",'success')
-		#return render_template('view-status.html', form=form, stat=stat,choices=choices,choicesp=choicesp)
+		return render_template('view-status.html', form=form, stat=stat, cc=cc, bcc=bcc, remstat=remstat, choicesp=choicesp, formatdate=formatdate)
 	return render_template('view-status.html', form=form,choicesp=choicesp)
 
 @app.route("/logout")

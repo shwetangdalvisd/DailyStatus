@@ -73,7 +73,7 @@
               </form>
           </div>
       {% if cc or bcc%}
-        <div class="panel panel-primary" style="margin-bottom: 10px;">
+        <div class="content-section" style="margin-bottom: 5px;">
             <form method="POST" method="GET">
                 <table border="0" class="table table-striped" style="margin-bottom: 0px;">
                     <tbody>
@@ -101,42 +101,65 @@
         <div class="content-section">
           <form method="POST" method="GET">
                 {% if stat %}
-                    <div class="content-section" style="font-family:'Tahoma'">
-                      <div class="style" style="font-size: 14px;font-style: normal;font: -webkit-mini-control;padding: 0px 0px;">
+                     <!-- <div class="content-section" style="font-family:'Tahoma'"> -->
+                      <div class = "font-style"style="/* font-style: unset; *//* padding: 0px 0px; */font-family: Tahoma;font: status-bar;">
                         Hi,
                         <br><br>Following are the status updates for 
                         <b>{{formatdate}}</b>,
                         <br><br>
-                    {% for s in stat %}
-                        <div style="height:30px;text-valign:center;">
-                        <i><b>{{s.env}}:</b></i>
+                        <i><b>Devlopment Status:</b></i>
                         <br><br>
-                        </div>
+                    {% for s in stat %}
                         <div style="height:30px;text-valign:center;">
                         <b>Name : {{s.username}}</b>
                         </div>
- 
-                        {% for u in s['status']%}
-                          {{s['status'].index(u)+1}}. <a href={{cc.ticketl+u.jira_no}}>{{u.jira_no}}:</a> {{ u['desc']}}<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;Status : <b>{{u['status']}}</b>
-                            <div class="style" style="padding: 0px 0px;">
-                            <ul>
-                            {% for cmd in u['Comment'] %}
-                            <li>{{cmd}}</li>
-                            {% endfor%}
-                            </ul>
-                            </div>
 
+                        {% for u in s['status']%}
+                          {% if u.jira_no == 'TASK' %}
+                            {{s['status'].index(u)+1}}. <b>{{u.jira_no}} : </b>{{u.desc}}<br>
+                          {% else %}
+                            {{s['status'].index(u)+1}}. <a href={{cc.ticketl+u.jira_no}}>{{u.jira_no}}:</a> {{ u['desc']}}<br>
+                          {% endif %}
+                            &nbsp;&nbsp;&nbsp;&nbsp;Status : <b>{{u['status']}}</b>
+                            <div>
+                                {% for cmd in u['Comment'] %}
+                                  <li style="padding-left:1.5em">{{cmd}}
+                                {% endfor%}
+                          </div>
+                              <br>
                       {% endfor%}
-<!--                         {% for u in s.status %}
-				                    <p><b>{{u.jira_no}}:</b>: {{ u.desc }}</p>
-                            <p><b>Status : {{u.status}}</b></p>
-                            <p><ul><li>{{u.Comment}}</li></ul></p>
-                        {% endfor %} -->
                     {% endfor %}
                   </div>
-                  </div>
                 {% endif %}
+                {% if remstat %}
+                  <div class = "font-style"style="/* font-style: unset; *//* padding: 0px 0px; */font-family: Tahoma;font: status-bar;">
+                    {% for s in remstat %}
+                    <div style="height:30px;text-valign:center;">
+                        <b>Name : {{s.username}}</b>
+                      </div>
+                        {% for i in s.pstatus %}
+                          <i><b>{{i.env}} :</b></i>
+                            <br><br>
+                            {% for st in i.status%}
+                              {% if st.jira_no == 'TASK' %}
+                                {{i['status'].index(st)+1}}. <b>{{st.jira_no}} : </b>{{st.desc}}<br>
+                              {% else %}
+                                {{i['status'].index(st)+1}}. <a href={{cc.ticketl+st.jira_no}}>{{st.jira_no}}:</a> {{ st['desc']}}<br>
+                              {% endif %}
+                            &nbsp;&nbsp;&nbsp;&nbsp;Status : <b>{{st['status']}}</b>
+                            
+                              {% for cmd in st['Comment'] %}
+                                 <li style="padding-left:1.5em">{{cmd}}
+                              {% endfor%}
+                            </li>
+                              <br>
+                            {% endfor%}
+                        {% endfor%}
+                    {% endfor%}  
+
+                {% endif %}
+              </div>
+
           </form>
         </div>
 {% endblock content %}

@@ -8,6 +8,9 @@ h1, h2, h3, h4, h5, h6 {
   color: #444444;
 }
 
+.font-style: {font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 24px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px; } h3 { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; } p { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px; } blockquote { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; } pre { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px;}
+
+
 .bg-steel {
   background-color: #5f788a;
 }
@@ -24,10 +27,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
 }
 
-.style {
-    font-family: 'Tahoma';
-    font-size: smaller;
-}
 .content-section {
   background: #ffffff;
   padding: 10px 20px;
