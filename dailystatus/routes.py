@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request,session,jsonify
 from dailystatus import app, mongo, bcrypt,login_manager,mail,cache
 from bson.json_util import dumps
-from dailystatus.forms import LoginForm,RegisterForm,ProjectForm,AssignForms,StatusForm,DeleteForms,View_statusForm
+from dailystatus.forms import LoginForm,RegisterForm,ProjectForm,AssignForms,StatusForm,DeleteForms,View_statusForm,ChangeForm
 from flask_login import login_user, current_user, logout_user, login_required,UserMixin
 from bson.objectid import ObjectId
 import json
@@ -21,6 +21,15 @@ class User(UserMixin):
 	def get_id(self):
 		return self.email
 
+def verify():
+	em = current_user.get_id()
+	User = mongo.db.user
+	user = User.find_one({"mail_id":em})
+	if user['role'] == "admin":
+		return True
+	else:
+		return False
+
 def suffix(d):
 	return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 
@@ -37,8 +46,6 @@ def load_user(email):
 @app.route("/")
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-	if current_user.is_authenticated:
-		return redirect(url_for('logout'))
 	form = LoginForm()
 	Uer = mongo.db.user
 	if form.validate_on_submit():
@@ -60,19 +67,30 @@ def login():
 @login_required
 @cache.memoize(50)
 def Register():
-	User = mongo.db.user
+
 	if current_user.is_authenticated:
-		pass
+		if verify():
+			pass
+		else:
+			return redirect(url_for('StatusUpdate'))
+	else:
+		return redirect(url_for('login'))
+	User = mongo.db.user
 	form = RegisterForm()
 	if form.username.data and form.email.data and form.password.data and form.role.data is not None:
 		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
 		user = User.find_one({"mail_id": form.email.data})
-		if user is None:
+		usern = User.find_one({"username": form.username.data})
+		if user is None :
 			User.insert({"username" : form.username.data, "mail_id" : form.email.data, "password" : hashed_password,"role" : form.role.data})
+			cre = form.password.data
+			msg = Message('Your account has been created on Daily Status',sender= 'shwetangdemo@gmail.com',recipients = [form.email.data])
+			msg.html = render_template('Cred.html', cre=cre)
+			mail.send(msg)
 			flash('Your account has been created! You are now able to log in', 'success')
-			return redirect(url_for('Register'))
+			return render_template('register.html', title='Register', form=form)
 		else:
-			flash('Username already exist! Enter new Username', 'danger')
+			flash('Email id or username already exist! Enter new Username or Email', 'danger')
 
 
 	return render_template('register.html', title='Register', form=form)
@@ -82,7 +100,12 @@ def Register():
 @cache.memoize(50)
 def Assign():
 	if current_user.is_authenticated:
-		pass
+		if verify():
+			pass
+		else:
+			return redirect(url_for('StatusUpdate'))
+	else:
+		return redirect(url_for('login'))
 	form = AssignForms()
 	choices = list(mongo.db.user.find())
 	choicesp = list(mongo.db.project_team.find())
@@ -107,6 +130,13 @@ def Assign():
 @app.route("/registerproject", methods=['GET', 'POST'])
 @login_required
 def RegisterProject():
+	if current_user.is_authenticated:
+		if verify():
+			pass
+		else:
+			return redirect(url_for('StatusUpdate'))
+	else:
+		return redirect(url_for('login'))
 	form = ProjectForm()
 	Project = mongo.db.project_team
 	if form.validate_on_submit():
@@ -123,6 +153,13 @@ def RegisterProject():
 @app.route("/statusupdate", methods=['GET', 'POST'])
 @login_required
 def StatusUpdate():
+	if current_user.is_authenticated:
+		if verify():
+			return redirect(url_for('Register'))
+		else:
+			pass
+	else:
+		return redirect(url_for('login'))
 	TaskS = mongo.db.task_status
 	TaskUD = mongo.db.task_status_ud
 	em = current_user.get_id()
@@ -174,6 +211,13 @@ def StatusUpdate():
 @app.route("/delete", methods=['GET', 'POST'])
 @login_required
 def DeleteD():
+	if current_user.is_authenticated:
+		if verify():
+			pass
+		else:
+			return redirect(url_for('StatusUpdate'))
+	else:
+		return redirect(url_for('login'))
 	User = mongo.db.user
 	project = mongo.db.project_team
 	form = DeleteForms()
@@ -184,18 +228,19 @@ def DeleteD():
 			project.update({},{"$pull":{"team_member":{"username":form.username.data}}}, multi=True)
 			User.remove({"username":form.username.data})
 			#msg = mongo.db.runCommand({"getLastError": 1})
-			flash('user removed successfully'+form.username.data)
+			flash('user removed successfully '+form.username.data,'success')
 			return redirect(url_for('DeleteD'))
 	elif form.radio.data == "project":
 		if form.project.data is not None:
 			User.update({},{'$pull':{'projects':form.project.data}}, multi=True)
 			project.remove({'project_name':form.project.data})
+			flash('Project removed successfully '+form.project.data,'success')
 			return redirect(url_for('DeleteD'))
 	elif form.radio.data == "userdel":
 		if form.project.data and form.username.data is not None:
 			project.update_one({'project_name':form.project.data},{'$pull':{'team_member':{'username':form.username.data}}})
 			User.update_one({'username':form.username.data},{'$pull':{'projects':form.project.data}})
-			flash('user removed successfully'+form.radio.data)
+			flash('user removed successfully '+form.radio.data,'success')
 			return redirect(url_for('DeleteD'))
 	return render_template('delete.html', title='Delete', form=form,choicesp=choicesp,choices=choices)
 
@@ -213,7 +258,10 @@ def username(project):
 def View_status():
 	form = View_statusForm()
 	if current_user.is_authenticated:
-		pass
+		if verify():
+			return redirect(url_for('Register'))
+		else:
+			pass
 	else:
 		return redirect(url_for('login'))
 	stat = []
@@ -247,8 +295,34 @@ def View_status():
 				em.append(i['mail_id'])
 		bcc = ";".join(em)
 		formatdate = custom_strftime('{S} %B %Y', form.date.data)
-		return render_template('view-status.html', form=form, stat=stat, cc=cc, bcc=bcc, remstat=remstat, choicesp=choicesp, formatdate=formatdate)
+		sub = cc['subject'] + ' Status Update of ' + formatdate
+
+		return render_template('view-status.html', form=form, stat=stat, cc=cc,sub=sub, bcc=bcc, remstat=remstat, choicesp=choicesp, formatdate=formatdate)
 	return render_template('view-status.html', form=form,choicesp=choicesp)
+
+@app.route("/changepassword", methods=['GET', 'POST'])
+@login_required
+def changepassword():
+	User = mongo.db.user
+	if current_user.is_authenticated:
+		if verify():
+			return redirect(url_for('StatusUpdate'))
+		else:
+			pass
+	else:
+		return redirect(url_for('login'))
+	form = ChangeForm()
+	em = current_user.get_id()
+	current_pass = User.find_one({"mail_id": em})
+	if form.new_password.data and form.current_password.data is not None:
+		if current_pass is not None and bcrypt.check_password_hash(current_pass['password'], form.current_password.data):
+			hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+			User.update({"mail_id" : em},{"$set": {"password" : hashed_password}})
+			flash('your password has been changed', 'success')
+			return redirect(url_for('changepassword'))
+		else:
+			flash('Wrong password, Please check', 'danger')
+	return render_template('changepassword.html', title='ChangePassword', form=form)
 
 @app.route("/logout")
 @login_required

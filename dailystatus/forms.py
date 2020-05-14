@@ -9,7 +9,6 @@ from flask_login import login_user, current_user
 class LoginForm(FlaskForm):
 	email = StringField('Email',validators=[DataRequired(), Email()])
 	password = PasswordField('Password', validators=[DataRequired()])
-	remember = BooleanField('Remember Me')
 	submit = SubmitField('Login')
 
 
@@ -60,7 +59,7 @@ class StatusForm(FlaskForm):
 	submit = SubmitField('submit')
 
 class View_statusForm(FlaskForm):
-	project = SelectField('Project')
+	project = SelectField('Project',validators=[DataRequired()])
 	username = SelectField('Username')
 	date = DateField('Date',format='%Y-%m-%d',validators=[DataRequired()])
 	mailcc = StringField('cc : ')
@@ -77,6 +76,12 @@ class DeleteForms(FlaskForm):
 	radio = RadioField('Select Option', choices=[('user', 'Delete User'), ('project', 'Delete Project'), ('userdel', 'Delete a user from a project ')])
 	submit = SubmitField('submit')
 
+class ChangeForm(FlaskForm):
+	current_password = PasswordField('Current Password', validators=[DataRequired()])
+	new_password = PasswordField('New Password', validators=[DataRequired()])
+	confirm_password = PasswordField('Confirm Password',validators=[DataRequired(), EqualTo('new_password')])
+	role = SelectField('Role',validators=[DataRequired()])
+	submit = SubmitField('Submit')
 
 
 

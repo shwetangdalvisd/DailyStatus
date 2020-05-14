@@ -26,13 +26,14 @@
   <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-          <a class="navbar-brand mr-4" href="/">Daily Vector</a>
+          <a class="navbar-brand mr-4" href="/">Daily Status</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
+                <a class="nav-item nav-link" href="{{ url_for('changepassword') }}">Change Password</a>
                 <a class="nav-item nav-link" href="{{ url_for('StatusUpdate') }}">Status Update</a>
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
             </div>
@@ -91,7 +92,7 @@
                         </tr>
                         <tr>
                             <td width="10%"><label class="control-label">Subject :</label></td>
-                            <td>{{ form.subject(class="form-control form-control-lg",value=cc.subject) }}</td>
+                            <td>{{ form.subject(class="form-control form-control-lg",value=sub) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -102,7 +103,7 @@
           <form method="POST" method="GET">
                 {% if stat %}
                      <!-- <div class="content-section" style="font-family:'Tahoma'"> -->
-                      <div class = "font-style"style="/* font-style: unset; *//* padding: 0px 0px; */font-family: Tahoma;font: status-bar;">
+                      <div class="font-style" style="/* font-style: unset; *//* padding: 0px 0px; */font-family: Tahoma;/* font-size: large; */font: status-bar;font-size: 14.5px;">
                         Hi,
                         <br><br>Following are the status updates for 
                         <b>{{formatdate}}</b>,
@@ -130,9 +131,15 @@
                       {% endfor%}
                     {% endfor %}
                   </div>
+                {% else %}
+                      <div class = "font-style"style="/* font-style: unset; *//* padding: 0px 0px; */font-family: Tahoma;font: status-bar;">
+                        Hi,
+                        <br><br>Following are the status updates for 
+                        <b>{{formatdate}}</b>,
+                        <br><br>
                 {% endif %}
                 {% if remstat %}
-                  <div class = "font-style"style="/* font-style: unset; *//* padding: 0px 0px; */font-family: Tahoma;font: status-bar;">
+                  <div class="font-style" style="/* font-style: unset; *//* padding: 0px 0px; */font-family: Tahoma;/* font-size: large; */font: status-bar;font-size: 14.5px;">
                     {% for s in remstat %}
                     <div style="height:30px;text-valign:center;">
                         <b>Name : {{s.username}}</b>
