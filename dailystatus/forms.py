@@ -73,7 +73,7 @@ class View_statusForm(FlaskForm):
 class DeleteForms(FlaskForm):
 	username = SelectField('username',validators=[Optional()])
 	project = SelectField('project',validators=[Optional()])
-	radio = RadioField('Select Option', choices=[('user', 'Delete User'), ('project', 'Delete Project'), ('userdel', 'Delete a user from a project ')])
+	radio = RadioField('Select Option', choices=[('user', 'Delete User'), ('project', 'Delete Project'), ('userdel', 'Delete a user from a project '), ('disable', 'Deactivate/Activate a user')])
 	submit = SubmitField('submit')
 
 class ChangeForm(FlaskForm):

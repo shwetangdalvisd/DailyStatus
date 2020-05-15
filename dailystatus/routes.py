@@ -49,7 +49,7 @@ def login():
 	form = LoginForm()
 	Uer = mongo.db.user
 	if form.validate_on_submit():
-		user = Uer.find_one({"mail_id": form.email.data})
+		user = Uer.find_one({"mail_id": form.email.data,"Active":True})
 		if user is not None and bcrypt.check_password_hash(user['password'], form.password.data):
 			user_obj = User(email=user['mail_id'])
 			login_user(user_obj)
@@ -79,8 +79,7 @@ def Register():
 	form = RegisterForm()
 	if form.username.data and form.email.data and form.password.data and form.role.data is not None:
 		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-		user = User.find_one({"mail_id": form.email.data})
-		usern = User.find_one({"username": form.username.data})
+		user = User.find_one({"mail_id": form.email.data,"username":form.username.data})
 		if user is None :
 			User.insert({"username" : form.username.data, "mail_id" : form.email.data, "password" : hashed_password,"role" : form.role.data})
 			cre = form.password.data
@@ -107,7 +106,7 @@ def Assign():
 	else:
 		return redirect(url_for('login'))
 	form = AssignForms()
-	choices = list(mongo.db.user.find())
+	choices = list(mongo.db.user.find({"Active":True}))
 	choicesp = list(mongo.db.project_team.find())
 	User = mongo.db.user
 	Project = mongo.db.project_team
@@ -241,6 +240,16 @@ def DeleteD():
 			project.update_one({'project_name':form.project.data},{'$pull':{'team_member':{'username':form.username.data}}})
 			User.update_one({'username':form.username.data},{'$pull':{'projects':form.project.data}})
 			flash('user removed successfully '+form.radio.data,'success')
+			return redirect(url_for('DeleteD'))
+	elif form.radio.data == "disable":
+		if form.username.data is not None:
+			use = User.find_one({"username":form.username.data},{"Active":1})
+			if use['Active'] == True:
+				User.update({"username":form.username.data},{"$set":{"Active":False}})
+				flash('user deactivated successfully','success')
+			else:
+				User.update({"username":form.username.data},{"$set":{"Active":True}})
+				flash('user activated successfully','success')
 			return redirect(url_for('DeleteD'))
 	return render_template('delete.html', title='Delete', form=form,choicesp=choicesp,choices=choices)
 
