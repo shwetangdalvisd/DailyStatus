@@ -77,19 +77,29 @@ def Register():
 		return redirect(url_for('login'))
 	User = mongo.db.user
 	form = RegisterForm()
-	if form.username.data and form.email.data and form.password.data and form.role.data is not None:
-		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-		user = User.find_one({"mail_id": form.email.data,"username":form.username.data})
-		if user is None :
-			User.insert({"username" : form.username.data, "mail_id" : form.email.data, "password" : hashed_password,"role" : form.role.data})
-			cre = form.password.data
-			msg = Message('Your account has been created on Daily Status',sender= 'shwetangdemo@gmail.com',recipients = [form.email.data])
-			msg.html = render_template('Cred.html', cre=cre)
-			mail.send(msg)
-			flash('Your account has been created! You are now able to log in', 'success')
-			return render_template('register.html', title='Register', form=form)
+	# if form.username.data and form.email.data and form.password.data and form.confirm_password.data and form.role.data is not None:
+	if all(v is not None for v in [form.username.data,form.email.data,form.password.data,form.confirm_password.data]) and form.role.data != '':	
+	# if form.validate_on_submit():
+		if form.password.data == form.confirm_password.data:
+			hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+			user = User.find_one({"mail_id": form.email.data})
+			usern = User.find_one({"username": form.username.data})
+			if all(v is None for v in [user,usern]):
+				try:
+					cre = form.password.data
+					msg = Message('Your account has been created on Daily Status',sender= 'shwetangdemo@gmail.com',recipients = [form.email.data])
+					msg.html = render_template('Cred.html', cre=cre)
+					#mail.send(msg)
+					User.insert({"username" : form.username.data, "mail_id" : form.email.data, "password" : hashed_password,"role" : form.role.data,"Active":True})
+					flash('Your account has been created! You are now able to log in', 'success')
+					return render_template('register.html', title='Register', form=form)
+				except:
+					flash('Enter Valid Email ID','danger')
+				return render_template('register.html', title='Register', form=form)
+			else:
+				flash('Email id or username already exist! Enter new Username or Email', 'danger')
 		else:
-			flash('Email id or username already exist! Enter new Username or Email', 'danger')
+			flash('password and confirm password must be same','danger')
 
 
 	return render_template('register.html', title='Register', form=form)
@@ -177,10 +187,14 @@ def StatusUpdate():
 		date= form.date.data.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 		iso_date = datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%fZ")
 		comments = []
-		if "\n" in form.comments.data:
-			comments = form.comments.data.split("\n")
+		if isinstance(form.comments.data,str):
+			comment=form.comments.data.strip()
+		if "\n" in comment:
+			comments = comment.split("\n")
 		else:
-			comments.append(form.comments.data)
+			comments.append(comment)
+		if isinstance(form.jirano.data,str):
+			form.jirano.data = form.jirano.data.strip()
 		if form.env.data == 'Development Status':
 			sd = TaskS.find_one({"project_name":form.project.data,"username":usr['username'],"date":iso_date,"env":form.env.data})
 			if sd is None:

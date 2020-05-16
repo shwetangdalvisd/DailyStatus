@@ -26,10 +26,10 @@
                         <tr>
                             <td width="16%"><label class="control-label">Select Project</label></td>
                             <td width="80%">
-                               <select class="form-control" id="project" name="project" size=1>
+                               <select class="form-control" id="project" name="project" size=1 required>
                                   {{ form.project.label(class="form-control-label") }}
 
-                                    <option >Select Project</option>
+                                    <option value=0 >Select Project</option>
 
                     
                                     {% for p in choices %}
@@ -72,7 +72,8 @@
                         <tr>
                             <td width="11%"><label class="control-label">Select Status</label></td>
                             <td width="20%">
-                                <select class="form-control" name="status" id="continent_selector" size=1>
+                                <select class="form-control" name="status" id="continent_selector" size=1 required>
+                                    <option value=0 >Select Project</option>
                                     <option value= 'To do' >To DO</option>
                                     <option value= 'In Devlopment' >In Devlopment</option>
                                     <option value= 'WorkIn Progress' >Work In Progress</option>
@@ -84,7 +85,8 @@
                             </td>
                             <td width="7%"><label class="control-label">Env</label></td>
                             <td width="25%">
-                                <select name = env class="form-control" name="env" id="continent_selector" size=1>
+                                <select name = env class="form-control" name="env" id="continent_selector" size=1 required>
+                                    <option value=0 >Select Project</option>
                                     <option value= 'Development Status'>Development Status</option>
                                     <option value= 'Development Testing Status'>Development Testing Status</option>
                                     <option value= 'UAT Testing'>UAT Testing</option>
