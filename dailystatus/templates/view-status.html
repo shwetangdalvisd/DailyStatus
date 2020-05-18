@@ -49,10 +49,10 @@
                         <tr>
                             <td width="16%"><label class="control-label">Select Project</label></td>
                             <td width="80%">
-                               <select class="form-control" id="project" name="project" size=1>
+                               <select class="form-control" id="project" name="project" size=1 required>
                                   {{ form.project.label(class="form-control-label") }}
 
-                                    <option >Select Project</option>
+                                    <option value="" >Select Project</option>
 
                     
                                     {% for p in choicesp %}

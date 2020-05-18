@@ -59,11 +59,11 @@
                                     {% endfor %}
                                     </div>
                                     {% else %}
-                                        {{ form.jirano(class="form-control form-control-lg") }}
+                                        {{ form.jirano(class="form-control form-control-lg" ) }}
                                     {% endif %}
                             </td>
                             <td width="5%"><label class="control-label">Title.</label></td>
-                            <td><textarea placeholder="Title (50 characters)" min="50" max="60" class="form-control" name="desc"></textarea></td>
+                            <td><textarea placeholder="Title (50 characters)" min="50" max="60" class="form-control" name="desc" required></textarea></td>
                         </tr>
                     </tbody>
                 </table>
@@ -99,7 +99,7 @@
                     <tbody>
                         <tr>
                             <td width="11%"><label class="control-label">Comments</label></td>
-                            <td><textarea placeholder="Comments" class="form-control" name="comments"></textarea></td>
+                            <td><textarea placeholder="Comments" class="form-control" name="comments" required></textarea></td>
                         </tr>
                     </tbody>
                 </table>

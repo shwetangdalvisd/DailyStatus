@@ -22,8 +22,8 @@ class RegisterForm(FlaskForm):
 
 class ProjectForm(FlaskForm):
 	Project = StringField('Project Name',validators=[DataRequired()])
-	doc = StringField('Enter Date of Conpletion')
-	Cromail = StringField('CRO Email',validators=[Optional(), Email()])
+	doc = StringField('Enter Date of Conpletion',validators=[DataRequired()])
+	Cromail = StringField('CRO Email',validators=[DataRequired(), Email()])
 	mailcc = StringField('Email CC',validators=[DataRequired()])
 	ticketl = StringField('Ticket Link',validators=[DataRequired()])
 	subject = StringField('Subject',validators=[DataRequired()])
@@ -45,7 +45,6 @@ def pjf():
 class AssignForms(FlaskForm):
 	username = SelectMultipleField('username')
 	project = SelectField('project')
-	projectteam = SelectField('projectteam')
 	submit = SubmitField('submit')
 
 class StatusForm(FlaskForm):
